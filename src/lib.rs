@@ -1,9 +1,9 @@
-use lazy_static::lazy_static;
 use std::{
     collections::HashMap,
     fs::File,
     io::{Error, ErrorKind, Result, Write},
 };
+use lazy_static::lazy_static;
 
 pub struct IniParser {
     sections: HashMap<String, HashMap<String, String>>,
@@ -20,7 +20,7 @@ impl IniParser {
         let section = section.to_lowercase();
         let key = key.to_lowercase();
         let value = value.to_lowercase();
-        if let None = self.sections.get(&section) {
+        if self.sections.get(&section).is_none() {
             self.sections.insert(section.clone(), HashMap::new());
         }
         self.sections
@@ -36,7 +36,7 @@ impl IniParser {
     pub fn get(&self, section: &str, key: &str) -> Option<String> {
         let section = section.to_lowercase();
         let key = key.to_lowercase();
-        if let None = self.sections.get(&section) {
+        if self.sections.get(&section).is_none() {
             return None;
         }
         self.sections.get(&section).unwrap().get(&key).cloned()
@@ -56,10 +56,10 @@ impl IniParser {
         let mut current_section = "".to_string();
         for line in content.lines() {
             let line = line.trim();
-            if line.starts_with("[") && line.ends_with("]") {
+            if line.starts_with('[') && line.ends_with(']') {
                 current_section = line[1..line.len() - 1].to_string();
-            } else if line.contains("=") && !line.starts_with("#") && !line.starts_with(";") {
-                let parts: Vec<&str> = line.split("=").collect();
+            } else if line.contains('=') && !line.starts_with('#') && !line.starts_with(';') {
+                let parts: Vec<&str> = line.split('=').collect();
                 if parts.len() != 2 {
                     return Err(Error::new(ErrorKind::Other, "invalid line"));
                 }
@@ -85,7 +85,7 @@ impl IniParser {
             Err(e) => return Err(e),
         };
         let content = self.save_to_string();
-        match file.write(content.as_bytes()) {
+        match file.write_all(content.as_bytes()) {
             Ok(_) => Ok(()),
             Err(e) => Err(e),
         }
